@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AquaMonitor Pro – Smart Water Quality Monitoring</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%235BC0F8'/><stop offset='100%25' stop-color='%230A4D8F'/></linearGradient></defs><path d='M32 4 C32 4, 12 26, 12 42 a20 20 0 0 0 40 0 C52 26, 32 4, 32 4 Z' fill='url(%23g)'/><path d='M32 8 C32 8, 24 18, 23 27 c4 -2 9 -3 13 -2 -1 -8 -4 -17 -4 -17 Z' fill='%233FA535'/></svg>" />
+</head>
+<body>
+
+<!-- ── Loading Overlay ─────────────────────────────────────── -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner dark" style="width:32px;height:32px;border-width:3px"></div>
+  <span style="font-size:13px;color:var(--text2)">Processing...</span>
+</div>
+
+<!-- ── Toast Container ────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  TOPBAR                                                  -->
+<!-- ════════════════════════════════════════════════════════ -->
+<header class="topbar">
+  <!-- Mobile hamburger — opens the sidebar on small screens -->
+  <button class="hamburger" id="hamburger-btn" type="button" aria-label="Open menu" aria-controls="mobile-sidebar" aria-expanded="false" onclick="toggleSidebar()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <a class="logo" href="#" onclick="showPage('dashboard');return false">
+    <div class="logo-icon" style="background:transparent;padding:0;width:auto;height:auto">
+      <svg viewBox="0 0 64 64" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="dropGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5BC0F8"/>
+            <stop offset="100%" stop-color="#0A4D8F"/>
+          </linearGradient>
+          <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#9BD96B"/>
+            <stop offset="100%" stop-color="#3FA535"/>
+          </linearGradient>
+        </defs>
+        <path d="M32 4 C32 4, 12 26, 12 42 a20 20 0 0 0 40 0 C52 26, 32 4, 32 4 Z" fill="url(#dropGrad)"/>
+        <path d="M32 8 C32 8, 24 18, 23 27 c4 -2 9 -3 13 -2 -1 -8 -4 -17 -4 -17 Z" fill="url(#leafGrad)"/>
+        <path d="M20 40 c3 -2 7 -2 10 0 s8 2 12 0 c2 4 -3 7 -8 6 c-4 -1 -7 1 -10 2 c-4 1 -6 -5 -4 -8 Z" fill="#FFFFFF" opacity=".55"/>
+      </svg>
+    </div>
+    AquaMonitor Pro
+  </a>
+
+  <nav class="nav">
+    <button class="nav-btn" data-page="dashboard">Dashboard</button>
+    <button class="nav-btn" data-page="stations">Stations</button>
+    <button class="nav-btn" data-page="analytics">Analytics</button>
+    <button class="nav-btn" data-page="alerts">Alerts</button>
+    <button class="nav-btn" data-page="reports">Reports</button>
+    <button class="nav-btn" data-page="payment">Premium</button>
+    <button class="nav-btn" data-page="contact">Contact</button>
+    <button class="nav-btn" data-page="about">About</button>
+  </nav>
+
+  <div class="topbar-right">
+    <!-- Theme Picker -->
+    <div style="position:relative" id="theme-picker-wrap">
+      <button class="icon-btn" onclick="toggleThemePicker()" title="Change theme" id="theme-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+      </button>
+      <!-- Theme dropdown panel -->
+      <div id="theme-panel" style="display:none;position:fixed;top:60px;right:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;width:240px;box-shadow:var(--shadow-lg);z-index:999">
+        <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Choose Theme</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="theme-options">
+          <button class="theme-opt" data-theme="blue-light"   onclick="applyTheme('blue-light')"  style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:none;cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);transition:all .15s">
+            <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#0F62FE,#E8F1FF);flex-shrink:0;border:2px solid var(--border)"></span> Blue Light
+          </button>
+          <button class="theme-opt" data-theme="blue-dark"    onclick="applyTheme('blue-dark')"   style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:none;cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);transition:all .15s">
+            <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#4589FF,#0F1923);flex-shrink:0;border:2px solid #2A3544"></span> Blue Dark
+          </button>
+          <button class="theme-opt" data-theme="green-light"  onclick="applyTheme('green-light')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:none;cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);transition:all .15s">
+            <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#0A7C59,#E0F5EF);flex-shrink:0;border:2px solid #C3E6D8"></span> Green Light
+          </button>
+          <button class="theme-opt" data-theme="green-dark"   onclick="applyTheme('green-dark')"  style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:none;cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);transition:all .15s">
+            <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#3DDC97,#0A1A12);flex-shrink:0;border:2px solid #1E4030"></span> Green Dark
+          </button>
+          <button class="theme-opt" data-theme="cream"        onclick="applyTheme('cream')"        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:none;cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);transition:all .15s">
+            <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#8B5E3C,#FDF8F2);flex-shrink:0;border:2px solid #E8D9C5"></span> Warm Cream
+          </button>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)">Theme is saved and remembered across sessions.</div>
+      </div>
+    </div>
+
+    <div class="notif-wrap">
+      <button class="icon-btn" data-page="alerts" title="Alerts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+      <div class="notif-dot" id="notif-dot"></div>
+    </div>
+    <button class="avatar" id="top-avatar" data-page="account" title="Account">--</button>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  MAIN LAYOUT                                             -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- ── Sidebar ───────────────────────────────────────── -->
+  <!-- Mobile-only backdrop behind the slide-in sidebar -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="mobile-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Monitor</div>
+      <div class="side-item" data-page="dashboard">
+        <svg class="side-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </div>
+      <div class="side-item" data-page="stations">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        Stations
+      </div>
+      <div class="side-item" data-page="analytics">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+        Analytics
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Manage</div>
+      <div class="side-item" data-page="alerts">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        Alerts
+      </div>
+      <div class="side-item" data-page="reports">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+        Reports
+      </div>
+      <div class="side-item" data-page="payment">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+        Premium
+      </div>
+      <div class="side-item" data-page="contact">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+        Contact
+      </div>
+      <div class="side-item" data-page="about">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        About
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">User</div>
+      <div class="side-item" data-page="account">
+        <svg class="side-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Account
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Content Area ────────────────────────────────────── -->
+  <main class="content-area">
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: DASHBOARD                                   -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-dashboard" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Water Quality Dashboard</h1>
+          <div class="page-sub"><span class="live-dot"></span>Live data · <span id="dash-active-count">0</span> rivers active</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-reading')">+ Add Reading</button>
+          <button class="btn btn-primary btn-sm" data-page="reports">Generate Report</button>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="grid-4 mb-24" style="grid-template-columns:repeat(5,minmax(0,1fr))">
+        <div class="stat-card c-safe">
+          <div class="stat-lbl">Avg pH Level</div>
+          <div class="stat-val" id="dash-ph" style="color:var(--success)">--</div>
+          <div class="stat-note" style="color:var(--success)">✓ Safe range 6.5–8.5</div>
+        </div>
+        <div class="stat-card c-warn">
+          <div class="stat-lbl">Turbidity (NTU)</div>
+          <div class="stat-val" id="dash-turb" style="color:var(--warning)">--</div>
+          <div class="stat-note" style="color:var(--warning)">⚠ Monitor closely</div>
+        </div>
+        <div class="stat-card c-info">
+          <div class="stat-lbl">Temperature (°C)</div>
+          <div class="stat-val" id="dash-temp" style="color:var(--primary)">--</div>
+          <div class="stat-note" style="color:var(--primary)">✓ Normal range</div>
+        </div>
+        <div class="stat-card c-safe">
+          <div class="stat-lbl">Dissolved O₂ (mg/L)</div>
+          <div class="stat-val" id="dash-do" style="color:var(--success)">--</div>
+          <div class="stat-note" style="color:var(--success)">✓ Good</div>
+        </div>
+        <div class="stat-card c-danger">
+          <div class="stat-lbl">TDS (ppm)</div>
+          <div class="stat-val" id="dash-tds" style="color:var(--danger)">--</div>
+          <div class="stat-note" style="color:var(--danger)">✗ Watch limit</div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <!-- Trend chart -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">pH & Turbidity Trend (24h)</div><div class="card-sub">All stations average</div></div>
+            <div style="display:flex;gap:10px;font-size:11px;align-items:center">
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#0F62FE;display:inline-block;border-radius:2px"></span>pH</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#D4A017;display:inline-block;border-radius:2px;border-top:2px dashed #D4A017;height:0"></span>Turbidity</span>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-trend" role="img" aria-label="24-hour pH and turbidity trend">pH and turbidity over 24 hours.</canvas></div>
+        </div>
+
+        <!-- WQI Rings -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Water Quality Index</div><div class="card-sub">Per station score (0–100)</div></div>
+            <span class="tag tag-safe"><span id="wqi-station-count">0</span> rivers</span>
+          </div>
+          <div id="wqi-rings" class="wqi-scroll" style="display:flex;align-items:center;gap:18px;height:200px;overflow-x:auto;overflow-y:hidden;padding:0 4px;scroll-snap-type:x mandatory">
+            <div style="font-size:12px;color:var(--text3)">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Map -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Station Map</div><span class="tag tag-info"><span id="map-station-count">0</span> active</span></div>
+          <div class="map-area">
+            <div class="map-grid"></div>
+            <div id="map-pins"></div>
+            <div style="position:absolute;bottom:8px;right:10px;display:flex;gap:10px;font-size:10px;background:rgba(255,255,255,.85);padding:4px 8px;border-radius:6px">
+              <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#24A148;display:inline-block"></span>Safe</span>
+              <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#D4A017;display:inline-block"></span>Caution</span>
+              <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:50%;background:#DA1E28;display:inline-block"></span>Alert</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent alerts -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Alerts</div>
+            <button class="btn btn-outline btn-sm" data-page="alerts">View all</button>
+          </div>
+          <div class="alert-list" id="dash-alert-list">
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:20px">Loading alerts...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /dashboard -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: STATIONS                                    -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-stations" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">IoT Monitoring Stations</h1>
+          <div class="page-sub"><span class="live-dot"></span>Real-time sensor data</div>
+        </div>
+        <div class="page-actions">
+          <!-- Hidden by default; shown only for admin via JS -->
+          <button id="stations-add-btn" class="btn btn-primary btn-sm" style="display:none" onclick="openModal('modal-add-reading')">+ Add Reading</button>
+        </div>
+      </div>
+
+      <div class="station-grid" id="station-cards">
+        <div style="flex:1 0 100%;text-align:center;padding:40px;color:var(--text3);font-size:13px">Loading stations...</div>
+      </div>
+
+      <!-- Latest parameter feed -->
+      <div class="card mb-16">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="station-detail-name">Real-time Sensor Feed</div>
+            <div class="card-sub">Live parameter readings with safety status</div>
+          </div>
+          <span class="tag tag-info">Auto-refresh</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Safe Range</th><th>Status</th><th>Last Updated</th></tr>
+            </thead>
+            <tbody id="station-detail-table">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Select a station above</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reading history with delete (admin sees Delete column, users don't) -->
+      <div id="readings-history-section" class="card" style="display:none">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Reading History</div>
+            <div class="card-sub" id="readings-history-sub">All saved readings</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadReadingsHistory()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date / Time</th>
+                <th>Station</th>
+                <th>pH</th>
+                <th>Turbidity</th>
+                <th>Temp</th>
+                <th>TDS</th>
+                <th>Status</th>
+                <th class="th-delete" style="display:none">Action</th>
+              </tr>
+            </thead>
+            <tbody id="readings-history-body">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- /stations -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: ANALYTICS                                   -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-analytics" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Analytics & Trends</h1>
+          <div class="page-sub">Historical data, trend analysis and AI predictions</div>
+        </div>
+        <div class="page-actions">
+          <!-- Populated dynamically from DB rivers -->
+          <select class="form-input" id="analytics-station-filter" style="width:auto;padding:6px 30px 6px 10px;font-size:12px" onchange="onAnalyticsFilterChange()">
+            <option value="all">All Rivers</option>
+          </select>
+          <select class="form-input" id="analytics-days-filter" style="width:auto;padding:6px 30px 6px 10px;font-size:12px" onchange="onAnalyticsFilterChange()">
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 3 months</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Premium upgrade banner -->
+      <div id="analytics-upgrade-banner" style="display:none;background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--primary)">📊 Full Analytics requires Pro plan</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Showing demo data. Upgrade to see real historical analytics.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" data-page="payment">Upgrade to Pro</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchAnalyticsTab(this,'tab-an-overview')">Overview</button>
+        <button class="tab" onclick="switchAnalyticsTab(this,'tab-an-ph')">pH Analysis</button>
+        <button class="tab" onclick="switchAnalyticsTab(this,'tab-an-predict')">AI Prediction</button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div id="tab-an-overview">
+        <div class="grid-2 mb-16">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title" id="ph-chart-title">Average pH Level</div>
+                <div class="card-sub" id="ph-chart-sub">All rivers</div>
+              </div>
+              <!-- Dynamic legend filled by JS -->
+              <div id="ph-chart-legend" style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;max-width:200px;justify-content:flex-end"></div>
+            </div>
+            <div class="chart-wrap" style="height:200px"><canvas id="chart-ph-bar" role="img" aria-label="Average pH bar chart">Average pH per river.</canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quality Distribution</div></div>
+            <div class="chart-wrap" style="height:150px"><canvas id="chart-distribution" role="img" aria-label="Quality distribution doughnut">Safe, caution, and alert distribution.</canvas></div>
+            <div style="display:flex;gap:14px;font-size:11px;justify-content:center;margin-top:10px">
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#24A148;display:inline-block"></span>Safe</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#D4A017;display:inline-block"></span>Caution</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#DA1E28;display:inline-block"></span>Alert</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title" id="multi-chart-title">Multi-parameter Trend</div>
+              <div class="card-sub" id="multi-chart-sub">Temperature · Dissolved O₂ · TDS</div>
+            </div>
+            <div id="multi-chart-legend" style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;max-width:240px;justify-content:flex-end">
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#DA1E28;display:inline-block"></span>Temp</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#0F62FE;display:inline-block"></span>DO₂</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#24A148;display:inline-block;border-top:2px dashed #24A148;height:0"></span>TDS/10</span>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-multi" role="img" aria-label="Multi-parameter trend chart">Multi-parameter trends over selected period.</canvas></div>
+        </div>
+      </div>
+
+      <!-- pH Analysis Tab -->
+      <div id="tab-an-ph" style="display:none">
+        <div class="card">
+          <div class="card-header"><div class="card-title">pH Deep Analysis – All Stations</div><span class="tag tag-info">Scatter view</span></div>
+          <div class="chart-wrap" style="height:280px"><canvas id="chart-ph-scatter" role="img" aria-label="pH scatter chart">pH readings scatter across all stations over time.</canvas></div>
+        </div>
+      </div>
+
+      <!-- AI Prediction Tab -->
+      <div id="tab-an-predict" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">AI-based Quality Prediction (next 72h)</div><div class="card-sub">LSTM model · 90-day training · 84% confidence</div></div>
+            <span class="tag tag-warn">Beta</span>
+          </div>
+          <div style="background:var(--primary-light);border-radius:var(--r-sm);padding:14px;margin-bottom:16px;font-size:12px;color:var(--primary);border:1px solid rgba(15,98,254,.15)">
+            ⚡ Prediction: Station 2 TDS may exceed safe limit in ~14 hours. Recommend increased monitoring.
+          </div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-predict" role="img" aria-label="WQI prediction chart">Actual vs predicted water quality index.</canvas></div>
+          <div style="display:flex;gap:14px;font-size:11px;margin-top:12px">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#0F62FE;display:inline-block"></span>Actual WQI</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#DA1E28;display:inline-block;border-top:2px dashed #DA1E28;height:0"></span>Predicted WQI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /analytics -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: ALERTS                                      -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-alerts" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Alert Center</h1>
+          <div class="page-sub" id="alert-total-badge">Loading...</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="openModal('modal-alert-config')">Configure Thresholds</button>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-24">
+        <!-- Notification channels -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">Notification Channels</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--success-light);border-radius:var(--r-sm)">
+              <span style="font-size:13px">📧 Email Alerts (Nodemailer)</span><span class="tag tag-safe">Active</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <span style="font-size:13px">📱 SMS Alerts (Twilio)</span><span class="tag tag-warn">Configure in .env</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <span style="font-size:13px">🔔 Push Notifications</span><span class="tag tag-primary">Pro Plan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">Alert Summary (Today)</div>
+          <div style="display:flex;gap:12px">
+            <div style="flex:1;text-align:center;background:var(--danger-light);padding:16px;border-radius:var(--r-sm)">
+              <div style="font-size:28px;font-weight:700;color:var(--danger);font-family:var(--mono)" id="alert-count-critical">0</div>
+              <div style="font-size:11px;color:var(--danger);margin-top:2px">Critical</div>
+            </div>
+            <div style="flex:1;text-align:center;background:var(--warning-light);padding:16px;border-radius:var(--r-sm)">
+              <div style="font-size:28px;font-weight:700;color:#7A4F00;font-family:var(--mono)" id="alert-count-warning">0</div>
+              <div style="font-size:11px;color:#7A4F00;margin-top:2px">Warning</div>
+            </div>
+            <div style="flex:1;text-align:center;background:var(--info-light);padding:16px;border-radius:var(--r-sm)">
+              <div style="font-size:28px;font-weight:700;color:var(--info);font-family:var(--mono)" id="alert-count-info">0</div>
+              <div style="font-size:11px;color:var(--info);margin-top:2px">Info</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Alert Log</div></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Time</th><th>Station</th><th>Parameter</th><th>Value</th><th>Threshold</th><th>Severity</th><th>Action</th></tr>
+            </thead>
+            <tbody id="alert-table-body">
+              <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3)">Loading alerts...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- /alerts -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: REPORTS                                     -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-reports" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Reports & Exports</h1>
+          <div class="page-sub" id="reports-plan-note">Loading...</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" onclick="downloadReport('daily')">Generate PDF Report</button>
+        </div>
+      </div>
+
+      <div class="grid-3 mb-24">
+        <div class="report-card" id="report-card-daily" onclick="downloadReport('daily')">
+          <div class="report-icon">📄</div>
+          <div class="report-name">Daily Report</div>
+          <div class="report-desc">Today's full analysis with all parameters</div>
+          <button class="btn btn-outline btn-sm" id="report-btn-daily">Download PDF</button>
+        </div>
+        <div class="report-card" id="report-card-weekly" onclick="downloadReport('weekly')">
+          <div class="report-icon">📊</div>
+          <div class="report-name">Weekly Summary</div>
+          <div class="report-desc">7-day trend analysis with charts</div>
+          <button class="btn btn-outline btn-sm" id="report-btn-weekly">Download PDF</button>
+        </div>
+        <div class="report-card" id="report-card-monthly" onclick="downloadReport('monthly')">
+          <div class="report-icon">📈</div>
+          <div class="report-name">Monthly Analytics</div>
+          <div class="report-desc">Historical data + AI insights</div>
+          <button class="btn btn-outline btn-sm" id="report-btn-monthly">Download PDF</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Report History</div></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Report</th><th>Type</th><th>Generated</th><th>Stations</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Daily Report – Today</td><td>Daily</td><td>Today 08:00</td><td>All</td>
+                <td><span class="tag tag-safe">Ready</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="toast('PDF download started','success')">Download</button></td>
+              </tr>
+              <tr>
+                <td>Weekly Summary</td><td>Weekly</td><td>Last week</td><td>All</td>
+                <td><span class="tag tag-warn">Premium</span></td>
+                <td><button class="btn btn-primary btn-sm" data-page="payment">Upgrade</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- /reports -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: PAYMENT / PREMIUM                          -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-payment" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title" id="payment-page-title">Premium Plans</h1>
+          <div class="page-sub" id="payment-page-sub">Current plan: <span id="current-plan-badge" style="font-weight:600;color:var(--primary)">FREE</span></div>
+        </div>
+      </div>
+
+      <!-- Plan cards (hidden for admin) -->
+      <div class="plan-grid" id="plan-grid-section">
+        <!-- Free -->
+        <div class="plan-card">
+          <div class="plan-name">Basic</div>
+          <div class="plan-price">Free</div>
+          <div class="plan-period">forever</div>
+          <ul class="plan-features">
+            <li>3 stations monitoring</li>
+            <li>Daily PDF reports</li>
+            <li>Email alerts</li>
+            <li>7-day data history</li>
+            <li>Manual data entry</li>
+          </ul>
+          <button class="btn btn-outline btn-full" disabled>Current Plan</button>
+        </div>
+
+        <!-- Pro -->
+        <div class="plan-card featured">
+          <div style="background:var(--primary);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px">Most Popular</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">₹499</div>
+          <div class="plan-period">per month</div>
+          <ul class="plan-features">
+            <li>Unlimited stations</li>
+            <li>Weekly + Monthly reports</li>
+            <li>SMS + Push alerts</li>
+            <li>AI quality prediction</li>
+            <li>90-day data history</li>
+            <li>Advanced analytics</li>
+            <li>Priority support</li>
+          </ul>
+          <button class="btn btn-primary btn-full" onclick="initiatePayment('pro')">Subscribe – ₹499/mo</button>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="plan-card">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price">₹1999</div>
+          <div class="plan-period">per month</div>
+          <ul class="plan-features">
+            <li>Everything in Pro</li>
+            <li>Custom integrations</li>
+            <li>API access</li>
+            <li>Dedicated support</li>
+            <li>1-year data history</li>
+            <li>Regulatory compliance</li>
+            <li>White-label option</li>
+          </ul>
+          <button class="btn btn-outline btn-full" onclick="initiatePayment('enterprise')">Get Enterprise</button>
+        </div>
+      </div>
+
+      <!-- Admin-only banner (shown only for admin) -->
+      <div id="admin-premium-banner" style="display:none;background:linear-gradient(135deg,var(--primary),var(--primary-dark,#0353a4));color:#fff;border-radius:var(--r);padding:24px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="font-size:32px">👑</div>
+          <div>
+            <div style="font-size:18px;font-weight:600;margin-bottom:4px">Admin Account</div>
+            <div style="font-size:13px;opacity:.9">You have full access to all features. No subscription needed.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment History -->
+      <div class="card">
+        <div class="card-header"><div class="card-title" id="payment-history-title">Payment History</div></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th id="payment-history-user-col" style="display:none">User</th><th>Plan</th><th>Amount</th><th>Payment / Order ID</th><th>Status</th></tr></thead>
+            <tbody id="payment-history-body">
+              <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No payment records yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="payment-secure-note" style="background:var(--surface2);border-radius:var(--r);padding:16px;margin-top:16px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:10px">
+        🔒 Payments are processed securely via <strong>Razorpay</strong>. 256-bit SSL encryption. Your card data is never stored on our servers.
+      </div>
+    </div>
+    <!-- /payment -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: ACCOUNT (Login / Register / Profile)       -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-account" class="page">
+
+      <!-- ── Auth Section (shown when logged out) ──── -->
+      <div id="account-login-section">
+        <div class="auth-wrap">
+          <div class="auth-card">
+
+            <!-- Logo -->
+            <div class="auth-logo">
+              <div class="logo-icon" style="background:transparent;padding:0;width:auto;height:auto">
+                <svg viewBox="0 0 64 64" width="56" height="56" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="dropGrad2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#5BC0F8"/><stop offset="100%" stop-color="#0A4D8F"/>
+                    </linearGradient>
+                    <linearGradient id="leafGrad2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#9BD96B"/><stop offset="100%" stop-color="#3FA535"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M32 4 C32 4, 12 26, 12 42 a20 20 0 0 0 40 0 C52 26, 32 4, 32 4 Z" fill="url(#dropGrad2)"/>
+                  <path d="M32 8 C32 8, 24 18, 23 27 c4 -2 9 -3 13 -2 -1 -8 -4 -17 -4 -17 Z" fill="url(#leafGrad2)"/>
+                  <path d="M20 40 c3 -2 7 -2 10 0 s8 2 12 0 c2 4 -3 7 -8 6 c-4 -1 -7 1 -10 2 c-4 1 -6 -5 -4 -8 Z" fill="#FFFFFF" opacity=".55"/>
+                </svg>
+              </div>
+            </div>
+
+            <h1 class="auth-title" id="auth-title">Sign in to AquaMonitor</h1>
+            <p class="auth-sub" id="auth-sub">Water Quality Monitoring System</p>
+
+            <!-- ── Admin / User toggle ───────────────────────── -->
+            <div style="display:flex;background:var(--surface2);border-radius:var(--r-sm);padding:4px;margin-bottom:20px;gap:4px">
+              <button id="toggle-admin-btn"
+                onclick="setLoginMode('admin')"
+                style="flex:1;padding:8px;border-radius:6px;border:none;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;background:var(--primary);color:#fff">
+                🔐 Admin Login
+              </button>
+              <button id="toggle-user-btn"
+                onclick="setLoginMode('user')"
+                style="flex:1;padding:8px;border-radius:6px;border:none;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;background:transparent;color:var(--text2)">
+                👤 User Login
+              </button>
+            </div>
+
+            <!-- Admin mode notice (shown in admin mode) -->
+            <div id="admin-mode-notice" style="display:flex;align-items:center;gap:8px;background:var(--primary-light);border:1px solid rgba(15,98,254,.2);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--primary)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5zm-1 3v4h2V8h-2zm0 6v2h2v-2h-2z"/></svg>
+              <span>Admin login — full access to add, delete readings and manage users.</span>
+            </div>
+
+            <!-- User mode notice (shown in user mode) -->
+            <div id="user-mode-notice" style="display:none;align-items:center;gap:8px;background:var(--success-light);border:1px solid rgba(36,161,72,.2);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--success)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              <span>User login — view dashboards, analytics and alerts. Read-only access.</span>
+            </div>
+
+            <!-- Admin blocked banner -->
+            <div id="admin-block-banner" style="display:none;background:var(--danger-light);border:1px solid var(--danger);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--danger);align-items:flex-start;gap:10px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;margin-top:1px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <div>
+                <div style="font-weight:600;margin-bottom:2px">Access Denied — Admin Only</div>
+                <div>Your account does not have admin privileges. Switch to <strong>User Login</strong> above to log in, or contact the admin to promote your account.</div>
+              </div>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="auth-login-form">
+              <form id="login-form" novalidate>
+                <div class="form-group">
+                  <label class="form-label" for="login-email">Email address</label>
+                  <input class="form-input" type="email" id="login-email" placeholder="your@email.com" autocomplete="email"/>
+                  <div class="form-error"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="login-password">Password</label>
+                  <div style="position:relative">
+                    <input class="form-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" style="padding-right:40px"/>
+                    <button type="button" onclick="togglePw('login-password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px">Show</button>
+                  </div>
+                  <div class="form-error"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" checked/> Remember me</label>
+                  <a href="#" style="color:var(--primary);text-decoration:none">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-btn">Sign In</button>
+              </form>
+              <div class="auth-toggle">
+                Don't have an account? <a href="#" onclick="setAuthMode('register');return false">Create account</a>
+              </div>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="auth-register-form" style="display:none">
+              <form id="register-form" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="reg-name">Full name *</label>
+                    <input class="form-input" type="text" id="reg-name" placeholder="Arjun Singh" autocomplete="name"/>
+                    <div class="form-error"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="reg-phone">Phone</label>
+                    <input class="form-input" type="tel" id="reg-phone" placeholder="+91 98765 43210"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="reg-email">Email address *</label>
+                  <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+                  <div class="form-error"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="reg-org">Organization</label>
+                  <input class="form-input" type="text" id="reg-org" placeholder="Punjab Water Board"/>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="reg-password">Password *</label>
+                    <input class="form-input" type="password" id="reg-password" placeholder="Min. 6 characters" autocomplete="new-password"/>
+                    <div class="form-error"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="reg-confirm">Confirm password *</label>
+                    <input class="form-input" type="password" id="reg-confirm" placeholder="Repeat password"/>
+                    <div class="form-error"></div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="register-btn">Create Account</button>
+              </form>
+              <div class="auth-toggle">
+                Already have an account? <a href="#" onclick="setAuthMode('login');return false">Sign in</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- /auth section -->
+
+      <!-- ── Profile Section (shown when logged in) ── -->
+      <div id="account-profile-section" style="display:none">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">My Account</h1>
+            <div class="page-sub">Manage your profile and settings</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-outline btn-sm" onclick="openModal('modal-change-pw')">Change Password</button>
+            <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+          </div>
+        </div>
+
+        <!-- Profile info -->
+        <div class="card mb-16">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">--</div>
+            <div>
+              <div style="font-size:17px;font-weight:600" id="profile-name">Loading...</div>
+              <div style="font-size:13px;color:var(--text3)" id="profile-email"></div>
+              <div style="display:flex;gap:8px;margin-top:6px">
+                <span class="tag tag-primary" id="profile-role">USER</span>
+                <span class="tag tag-safe" id="profile-plan">FREE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Edit profile -->
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">Edit Profile</div>
+            <form id="profile-form">
+              <div class="form-group">
+                <label class="form-label">Full name</label>
+                <input class="form-input" type="text" id="p-name" placeholder="Your name"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone number</label>
+                <input class="form-input" type="tel" id="p-phone" placeholder="+91 98765 43210"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Organization</label>
+                <input class="form-input" type="text" id="p-org" placeholder="Punjab Water Board"/>
+              </div>
+              <button type="submit" class="btn btn-primary" id="profile-save-btn">Save Changes</button>
+            </form>
+          </div>
+
+          <!-- Alert preferences -->
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">Alert Preferences</div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:13px">
+                <span>📧 Email notifications</span>
+                <input type="checkbox" id="alert-pref-email" checked style="width:18px;height:18px;cursor:pointer"/>
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:13px">
+                <span>📱 SMS notifications (Pro)</span>
+                <input type="checkbox" id="alert-pref-sms" style="width:18px;height:18px;cursor:pointer"/>
+              </label>
+              <div style="font-size:11px;color:var(--text3);padding:10px;background:var(--surface2);border-radius:var(--r-sm)">
+                Alerts are triggered automatically when sensor readings exceed safe thresholds.
+              </div>
+              <div id="account-subscription-block" style="padding-top:8px;border-top:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:500;margin-bottom:8px">Subscription</div>
+                <button class="btn btn-primary btn-sm" data-page="payment">Upgrade Plan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── User Management (Admin only) ────────────────── -->
+        <div id="user-management-section" style="display:none;margin-top:16px">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">User Management</div>
+                <div class="card-sub">Promote users to admin so they can add and manage readings</div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div style="background:var(--danger-light);border:1px solid var(--danger);border-radius:var(--r-sm);padding:6px 10px;font-size:11px;color:var(--danger)">
+                  ⚠ Only promote users you fully trust — admins can add and delete all readings
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="loadUserManagement()">Refresh</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Organization</th>
+                    <th>Plan</th>
+                    <th>Current Role</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="user-management-body">
+                  <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Loading users...</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:var(--r-sm);font-size:12px;color:var(--text2)">
+              <strong>How promotion works:</strong> Clicking "Make Admin" grants that user full access — they can log into this panel, add readings, delete readings, and manage other users. Click "Make User" to revoke admin access.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /profile section -->
+
+    </div>
+    <!-- /account -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: CONTACT                                     -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-contact" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title" id="contact-page-title">Contact Admin</h1>
+          <div class="page-sub" id="contact-page-sub">Send feedback, suggestions, or report issues</div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-16" id="contact-user-section">
+        <!-- Contact Form -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">✉️ Send a Message</div>
+          <form id="contact-form">
+            <div class="form-group">
+              <label class="form-label">Your Name *</label>
+              <input class="form-input" type="text" id="contact-name" placeholder="Your full name"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input class="form-input" type="email" id="contact-email" placeholder="your@email.com"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject *</label>
+              <select class="form-input" id="contact-subject">
+                <option value="">Select a topic...</option>
+                <option>Request to add a new river / station</option>
+                <option>Report incorrect data or reading</option>
+                <option>Feedback on the system</option>
+                <option>Request to update existing reading</option>
+                <option>Technical issue or bug</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message *</label>
+              <textarea class="form-input" id="contact-message" rows="5"
+                placeholder="Describe your request, feedback or issue in detail..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="contact-submit-btn">Send Message</button>
+          </form>
+        </div>
+
+        <!-- Contact Info + Guidelines -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px">📋 Contact Information</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--text2)">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:var(--r-sm)">
+                <span style="font-size:18px">📧</span>
+                <div><div style="font-weight:500">Admin Email</div><div style="font-size:11px;color:var(--text3)">admin@aquamonitor.in</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:var(--r-sm)">
+                <span style="font-size:18px">⏰</span>
+                <div><div style="font-weight:500">Response Time</div><div style="font-size:11px;color:var(--text3)">Usually within 24 hours</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:var(--r-sm)">
+                <span style="font-size:18px">🌐</span>
+                <div><div style="font-weight:500">System Version</div><div style="font-size:11px;color:var(--text3)">AquaMonitor Pro v1.0</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:10px">💡 What you can request</div>
+            <ul style="font-size:12px;color:var(--text2);line-height:2;list-style:none;padding:0">
+              <li>✅ Add a new river or monitoring station</li>
+              <li>✅ Correct a wrong reading or data entry</li>
+              <li>✅ Get promoted to admin (with reason)</li>
+              <li>✅ Report water quality concerns</li>
+              <li>✅ Suggest new features or improvements</li>
+              <li>✅ Request historical data exports</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Inbox — only visible to admin -->
+      <div id="contact-inbox-section" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📥 Admin Inbox</div>
+              <div class="card-sub">Messages sent by users</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="loadContactInbox()">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>From</th>
+                  <th>Subject</th>
+                  <th>Message</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="contact-inbox-body">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">Loading messages...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /contact -->
+
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!--  PAGE: ABOUT                                       -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div id="page-about" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">About AquaMonitor Pro</h1>
+          <div class="page-sub">Smart Water Quality Detection System — How it works</div>
+        </div>
+      </div>
+
+      <!-- Hero banner -->
+      <div style="background:var(--primary);border-radius:var(--r);padding:28px 32px;margin-bottom:20px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:22px;font-weight:700;margin-bottom:6px">🌊 Smart Water Quality Monitoring</div>
+          <div style="font-size:13px;opacity:.85;max-width:480px;line-height:1.6">
+            AquaMonitor Pro uses IoT sensors, real-time data processing, and AI-based analytics to continuously monitor water quality across rivers, lakes and reservoirs — keeping communities safe.
+          </div>
+        </div>
+        <div style="font-size:48px">💧</div>
+      </div>
+
+      <!-- How it works steps -->
+      <div class="card mb-16">
+        <div class="card-title" style="margin-bottom:20px">🔄 How the System Works — Step by Step</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+          <div style="text-align:center;padding:20px 12px;background:var(--primary-light);border-radius:var(--r);border:1px solid rgba(15,98,254,.15)">
+            <div style="font-size:32px;margin-bottom:10px">📡</div>
+            <div style="font-weight:600;font-size:13px;color:var(--primary);margin-bottom:6px">Step 1 — Sensors</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.6">IoT sensors (ESP32 / Raspberry Pi) are placed at water bodies and measure pH, turbidity, temperature, dissolved oxygen and TDS every 30 seconds.</div>
+          </div>
+          <div style="text-align:center;padding:20px 12px;background:var(--success-light);border-radius:var(--r);border:1px solid rgba(36,161,72,.15)">
+            <div style="font-size:32px;margin-bottom:10px">📤</div>
+            <div style="font-weight:600;font-size:13px;color:var(--success);margin-bottom:6px">Step 2 — Transmission</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.6">Sensor data is securely transmitted via HTTPS to our Node.js backend server using JWT-authenticated API calls. Admin can also enter readings manually.</div>
+          </div>
+          <div style="text-align:center;padding:20px 12px;background:var(--warning-light);border-radius:var(--r);border:1px solid rgba(212,160,23,.15)">
+            <div style="font-size:32px;margin-bottom:10px">⚙️</div>
+            <div style="font-weight:600;font-size:13px;color:var(--warning);margin-bottom:6px">Step 3 — Processing</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.6">The server calculates a Water Quality Index (WQI) from 0–100, checks all thresholds and automatically generates alerts if any parameter exceeds safe limits.</div>
+          </div>
+          <div style="text-align:center;padding:20px 12px;background:var(--info-light);border-radius:var(--r);border:1px solid rgba(0,114,195,.15)">
+            <div style="font-size:32px;margin-bottom:10px">📊</div>
+            <div style="font-weight:600;font-size:13px;color:var(--info);margin-bottom:6px">Step 4 — Analytics</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.6">Results are displayed in real-time on this dashboard. Admins and users can view trends, filter by river, time period, and get AI-based quality predictions.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <!-- Parameters -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">📏 Parameters Monitored</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <div><div style="font-size:13px;font-weight:500">pH Level</div><div style="font-size:11px;color:var(--text3)">Measures acidity / alkalinity of water</div></div>
+              <span class="tag tag-safe">6.5 – 8.5</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <div><div style="font-size:13px;font-weight:500">Turbidity (NTU)</div><div style="font-size:11px;color:var(--text3)">Measures water cloudiness / particles</div></div>
+              <span class="tag tag-safe">0 – 100</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <div><div style="font-size:13px;font-weight:500">Temperature (°C)</div><div style="font-size:11px;color:var(--text3)">Affects biological activity in water</div></div>
+              <span class="tag tag-safe">10 – 35</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <div><div style="font-size:13px;font-weight:500">Dissolved O₂ (mg/L)</div><div style="font-size:11px;color:var(--text3)">Essential for aquatic life survival</div></div>
+              <span class="tag tag-safe">≥ 6.0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <div><div style="font-size:13px;font-weight:500">TDS (ppm)</div><div style="font-size:11px;color:var(--text3)">Total dissolved solids — minerals & salts</div></div>
+              <span class="tag tag-safe">0 – 500</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WQI explanation -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">🏆 Water Quality Index (WQI)</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7">The WQI is a score from 0–100 calculated automatically from all sensor readings. It gives a quick overall picture of water health.</p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--success-light);border-radius:var(--r-sm);border-left:4px solid var(--success)">
+              <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--success);min-width:40px">70+</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--success)">Safe</div><div style="font-size:11px;color:var(--text2)">Water is within all safe limits. Safe for use.</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--warning-light);border-radius:var(--r-sm);border-left:4px solid var(--warning)">
+              <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--warning);min-width:40px">50–69</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--warning)">Caution</div><div style="font-size:11px;color:var(--text2)">Some parameters near limits. Monitor closely.</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--danger-light);border-radius:var(--r-sm);border-left:4px solid var(--danger)">
+              <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--danger);min-width:40px">&lt;50</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--danger)">Unsafe</div><div style="font-size:11px;color:var(--text2)">Critical levels detected. Immediate action needed.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tech stack -->
+
+      <!-- <div class="card">
+        <div class="card-title" style="margin-bottom:16px">🛠️ Technology Stack</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div style="padding:16px;background:var(--surface2);border-radius:var(--r);text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🟢</div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">Backend</div>
+            <div style="font-size:11px;color:var(--text3)">Node.js · Express.js · MongoDB · Mongoose · JWT · bcryptjs · Razorpay</div>
+          </div>
+          <div style="padding:16px;background:var(--surface2);border-radius:var(--r);text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🔵</div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">Frontend</div>
+            <div style="font-size:11px;color:var(--text3)">HTML5 · CSS3 · Vanilla JavaScript · Chart.js · Responsive Design</div>
+          </div>
+          <div style="padding:16px;background:var(--surface2);border-radius:var(--r);text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🔴</div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">IoT Layer</div>
+            <div style="font-size:11px;color:var(--text3)">ESP32 / Arduino · MQTT / HTTPS · pH probe · Turbidity sensor · TDS meter</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:12px;background:var(--primary-light);border-radius:var(--r-sm);font-size:12px;color:var(--primary);text-align:center">
+          Built as a student project · AquaMonitor Pro v1.0 · Node.js + MongoDB + Chart.js
+        </div>
+      </div>
+    </div>
+  </about> -->
+
+  </main>
+</div>
+<!-- /app-layout -->
+
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  MODALS                                                  -->
+<!-- ════════════════════════════════════════════════════════ -->
+
+<!-- Add Reading Modal -->
+<div class="modal-overlay" id="modal-add-reading">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Water Quality Reading</span>
+      <button class="modal-close" onclick="closeModal('modal-add-reading')">×</button>
+    </div>
+    <form id="add-reading-form" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Station ID *</label>
+          <input class="form-input" type="text" id="r-stationId" placeholder="e.g. ST001" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Station Name *</label>
+          <input class="form-input" type="text" id="r-stationName" placeholder="e.g. Ravi River" required/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Location Name</label>
+          <input class="form-input" type="text" id="r-locName" placeholder="e.g. Ludhiana, Punjab"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">GPS Coordinates</label>
+          <div style="display:flex;gap:6px">
+            <input class="form-input" type="number" id="r-lat" placeholder="Lat" step="0.0001"/>
+            <input class="form-input" type="number" id="r-lng" placeholder="Lng" step="0.0001"/>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Sensor Readings</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">pH *</label>
+            <input class="form-input" type="number" id="r-ph" placeholder="7.0" step="0.1" min="0" max="14" required/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Turbidity (NTU) *</label>
+            <input class="form-input" type="number" id="r-turbidity" placeholder="50" step="0.1" required/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Temperature (°C) *</label>
+            <input class="form-input" type="number" id="r-temperature" placeholder="28" step="0.1" required/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Dissolved O₂ (mg/L) *</label>
+            <input class="form-input" type="number" id="r-do" placeholder="7.5" step="0.1" required/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">TDS (ppm) *</label>
+            <input class="form-input" type="number" id="r-tds" placeholder="300" required/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Conductivity (µS/cm)</label>
+            <input class="form-input" type="number" id="r-conductivity" placeholder="450"/>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1" id="add-reading-btn">Save Reading</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-reading')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Reading Modal (Admin Only) -->
+<div class="modal-overlay" id="modal-edit-reading">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="edit-modal-title">Edit Reading</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-reading')">×</button>
+    </div>
+    <form id="edit-reading-form" novalidate>
+      <input type="hidden" id="edit-reading-id"/>
+      <div style="background:var(--warning-light);border:1px solid var(--warning);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:14px;font-size:12px;color:#7A4F00">
+        ⚠️ Editing will update the reading, recalculate WQI, and clear old alerts for this station.
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Station Name</label>
+          <input class="form-input" type="text" id="edit-stationName" placeholder="e.g. Ravi River"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location Name</label>
+          <input class="form-input" type="text" id="edit-locName" placeholder="e.g. Ludhiana, Punjab"/>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Update Readings</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">pH</label>
+            <input class="form-input" type="number" id="edit-ph" step="0.1" min="0" max="14"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Turbidity (NTU)</label>
+            <input class="form-input" type="number" id="edit-turbidity" step="0.1"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Temperature (°C)</label>
+            <input class="form-input" type="number" id="edit-temperature" step="0.1"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Dissolved O₂ (mg/L)</label>
+            <input class="form-input" type="number" id="edit-do" step="0.1"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">TDS (ppm)</label>
+            <input class="form-input" type="number" id="edit-tds"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Conductivity (µS/cm)</label>
+            <input class="form-input" type="number" id="edit-conductivity"/>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1" id="edit-reading-btn">Update Reading</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-edit-reading')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div class="modal-overlay" id="modal-gen-report">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Generate PDF Report</span>
+      <button class="modal-close" onclick="closeModal('modal-gen-report')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Report type</label>
+      <select class="form-input"><option>Daily Summary</option><option>Weekly Trend</option><option>Monthly Analytics</option></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">From date</label>
+        <input class="form-input" type="date" id="report-from"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">To date</label>
+        <input class="form-input" type="date" id="report-to"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Stations</label>
+      <select class="form-input"><option>All Stations</option><option>Station 1 only</option><option>Station 2 only</option></select>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-gen-report');toast('PDF generation started — download will begin shortly','success')">Generate & Download</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-gen-report')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alert Config Modal -->
+<div class="modal-overlay" id="modal-alert-config">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Configure Alert Thresholds</span>
+      <button class="modal-close" onclick="closeModal('modal-alert-config')">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:0 2px">
+        <span>Parameter</span><span>Min</span><span>Max</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center">
+        <label style="font-size:13px">pH</label>
+        <input class="form-input" type="number" value="6.5" step="0.1"/>
+        <input class="form-input" type="number" value="8.5" step="0.1"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center">
+        <label style="font-size:13px">Turbidity (NTU)</label>
+        <input class="form-input" type="number" value="0"/>
+        <input class="form-input" type="number" value="100"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center">
+        <label style="font-size:13px">TDS (ppm)</label>
+        <input class="form-input" type="number" value="0"/>
+        <input class="form-input" type="number" value="500"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center">
+        <label style="font-size:13px">DO₂ (mg/L)</label>
+        <input class="form-input" type="number" value="6.0" step="0.1"/>
+        <input class="form-input" type="number" value="12.0" step="0.1"/>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-alert-config');toast('Thresholds saved','success')">Save Thresholds</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-alert-config')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-overlay" id="modal-change-pw">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Change Password</span>
+      <button class="modal-close" onclick="closeModal('modal-change-pw')">×</button>
+    </div>
+    <form id="pw-form">
+      <div class="form-group">
+        <label class="form-label">Current password</label>
+        <input class="form-input" type="password" id="pw-current" placeholder="Current password"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">New password</label>
+        <input class="form-input" type="password" id="pw-new" placeholder="Min. 6 characters"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm new password</label>
+        <input class="form-input" type="password" id="pw-confirm" placeholder="Repeat new password"/>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1" id="pw-save-btn">Change Password</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-change-pw')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Payment Success Modal -->
+<div class="modal-overlay" id="modal-pay-success">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:52px;margin-bottom:12px">✅</div>
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:8px">Payment Successful!</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:6px">Plan upgraded to <strong id="pay-success-plan">PRO</strong></p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:16px">Payment ID: <span id="pay-success-id" style="font-family:var(--mono)"></span></p>
+    <div style="background:var(--success-light);border-radius:var(--r-sm);padding:12px;font-size:12px;color:var(--success);margin-bottom:20px">
+      Premium features are now unlocked: AI Prediction, Advanced Analytics, Weekly Reports.
+    </div>
+    <button class="btn btn-primary" onclick="closeModal('modal-pay-success')">Continue to Dashboard</button>
+  </div>
+</div>
+
+<!-- Premium Locked Modal -->
+<div class="modal-overlay" id="modal-premium-locked">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:12px">🔒</div>
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:8px">Premium Feature</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px">This feature requires a Pro or Enterprise plan. Upgrade to unlock advanced analytics, AI predictions, and more.</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-primary" onclick="closeModal('modal-premium-locked');showPage('payment')">View Plans</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-premium-locked')">Not now</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                                 -->
+<!-- ════════════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- jsPDF for client-side PDF report generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Razorpay (comment out if testing without real keys) -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+// ── Extra helpers not in app.js ─────────────────────────────
+
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+  else { input.type = 'password'; btn.textContent = 'Show'; }
+}
+
+// NOTE: checkPremiumAndOpen(), switchAnalyticsTab() and downloadReport()
+// are now defined in app.js (they support dynamic river names, admin
+// bypass, and real PDF generation via jsPDF).
+
+// ── Set default dates for report modal ─────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().slice(0,10);
+  const rfrom = document.getElementById('report-from');
+  const rto   = document.getElementById('report-to');
+  if (rfrom) rfrom.value = today;
+  if (rto)   rto.value   = today;
+});
+</script>
+</body>
+</html>
