@@ -1,13 +1,9 @@
-<<<<<<< HEAD
 
-=======
->>>>>>> b03e5b4ba2ae02b64f49ac610e890a3158f078dd
 # AquaMonitor Pro
 ### Smart Water Quality Monitoring System with Payment Integration
 
 ---
 
-<<<<<<< HEAD
 ## 📁 Project Structure
 
 ```
@@ -184,34 +180,10 @@ fetch('http://localhost:5000/api/water', {
 3. Razorpay signature is verified server-side using HMAC-SHA256
 4. Passwords are hashed with bcrypt (salt rounds: 10)
 5. Premium routes are protected with `premiumOnly` middleware
-=======
-## 📌 Overview
-Smart Water Quality Detection system that monitors parameters like **pH, turbidity, temperature, TDS, and dissolved oxygen** in real time.  
-It uses sensors and basic ML logic to classify water as **Safe / Unsafe** and provides analytics through an interactive dashboard.
-
----
-
-## 📁 Project Structure
-
-aquamonitor/
-├── backend/
-├── frontend/
-
----
-
-## ⚙️ Features
-- Real-time water quality monitoring
-- Water Quality Index (WQI) calculation
-- Alerts for unsafe conditions
-- User authentication (JWT)
-- Razorpay payment integration
-- Dashboard with graphs & analytics
->>>>>>> b03e5b4ba2ae02b64f49ac610e890a3158f078dd
 
 ---
 
 ## 🛠️ Tech Stack
-<<<<<<< HEAD
 
 | Layer | Technology |
 |-------|-----------|
@@ -245,19 +217,3 @@ The WQI (0–100) is calculated automatically on each reading save:
 =======
 # Smart-Water-Quality-Detection
 Smart Water Quality Detection system that monitors parameters like pH, turbidity, and temperature in real time. Uses sensors and basic ML to classify water as safe or unsafe. Displays data through an interactive interface with database storage.
-=======
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js, Express
-- Database: MongoDB
-- Auth: JWT
-- Payments: Razorpay
-
----
-
-## 🚀 Setup
-
-```bash
-cd backend
-npm install
-npm run dev
->>>>>>> b03e5b4ba2ae02b64f49ac610e890a3158f078dd
