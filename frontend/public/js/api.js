@@ -34,13 +34,13 @@ async function apiFetch(endpoint, options = {}) {
 
 // ─── Auth API ────────────────────────────────────────────────────
 const AuthAPI = {
-  register:    (body) => apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
-  login:       (body) => apiFetch('/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
-  me:          ()     => apiFetch('/auth/me'),
-  updateProfile: (body) => apiFetch('/auth/profile',         { method: 'PUT', body: JSON.stringify(body) }),
-  changePassword:(body) => apiFetch('/auth/change-password', { method: 'PUT', body: JSON.stringify(body) }),
-  getAllUsers:  ()     => apiFetch('/auth/users'),
-  promoteUser: (id)   => apiFetch(`/auth/promote/${id}`,    { method: 'PUT' }),
+  register:    (body) => apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(body) }),
+  login:       (body) => apiFetch('/api/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
+  me:          ()     => apiFetch('/api/auth/me'),
+  updateProfile: (body) => apiFetch('/api/auth/profile',         { method: 'PUT', body: JSON.stringify(body) }),
+  changePassword:(body) => apiFetch('/api/auth/change-password', { method: 'PUT', body: JSON.stringify(body) }),
+  getAllUsers:  ()     => apiFetch('/api/auth/users'),
+  promoteUser: (id)   => apiFetch(`/api/auth/promote/${id}`,    { method: 'PUT' }),
 };
 
 // ─── Water API ───────────────────────────────────────────────────
