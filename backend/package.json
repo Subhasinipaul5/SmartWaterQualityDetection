@@ -14,11 +14,11 @@
     "express": "^4.22.1",
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
-<<<<<<< HEAD
+
     "mongoose": "^8.23.1",
-=======
+
     "mongoose": "^8.23.0",
->>>>>>> b03e5b4ba2ae02b64f49ac610e890a3158f078dd
+
     "nodemailer": "^6.9.7",
     "razorpay": "^2.9.2",
     "uuid": "^9.0.1"
