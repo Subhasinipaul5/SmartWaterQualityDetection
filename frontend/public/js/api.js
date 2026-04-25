@@ -1,5 +1,5 @@
 // ─── API Configuration ──────────────────────────────────────────
-const BASE_URL = "https://smart-water-detection.onrender.com/api";
+const BASE_URL = "https://smartwaterqualitydetection-1.onrender.com";
 
 // ─── Token helpers ──────────────────────────────────────────────
 const getToken = () => localStorage.getItem('aq_token');
