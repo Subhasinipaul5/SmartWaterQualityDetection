@@ -3,8 +3,12 @@ const { v4: uuidv4 } = require('uuid');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 
-// Lazy-load Razorpay so app doesn't crash if keys aren't set during dev
+// Lazy Razorpay init (safe for missing env)
 const getRazorpay = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay keys not configured');
+  }
+
   const Razorpay = require('razorpay');
   return new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -13,22 +17,26 @@ const getRazorpay = () => {
 };
 
 const PLAN_PRICES = {
-  pro: 49900,        // ₹499 in paise
-  enterprise: 199900, // ₹1999 in paise
+  pro: 49900,         // ₹499
+  enterprise: 199900, // ₹1999
 };
 
-// @desc    Create Razorpay order
-// @route   POST /api/payment/create-order
-// @access  Private
+// ===============================
+// CREATE ORDER
+// ===============================
 const createOrder = async (req, res) => {
   const { plan } = req.body;
 
   if (!plan || !PLAN_PRICES[plan]) {
-    return res.status(400).json({ success: false, message: 'Valid plan (pro/enterprise) is required' });
+    return res.status(400).json({
+      success: false,
+      message: 'Valid plan (pro/enterprise) is required',
+    });
   }
 
   try {
     const razorpay = getRazorpay();
+
     const receipt = `rcpt_${uuidv4().slice(0, 20)}`;
     const amount = PLAN_PRICES[plan];
 
@@ -36,10 +44,13 @@ const createOrder = async (req, res) => {
       amount,
       currency: 'INR',
       receipt,
-      notes: { userId: req.user._id.toString(), plan },
+      notes: {
+        userId: req.user._id.toString(),
+        plan,
+      },
     });
 
-    // Save order to DB
+    // Save order
     await Payment.create({
       userId: req.user._id,
       razorpayOrderId: order.id,
@@ -51,38 +62,45 @@ const createOrder = async (req, res) => {
 
     res.json({
       success: true,
-      order: {
-        id: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        receipt: order.receipt,
-      },
+      order,
       key: process.env.RAZORPAY_KEY_ID,
       user: {
         name: req.user.name,
         email: req.user.email,
-        phone: req.user.phone || '',
+        contact: req.user.phone || '',
       },
     });
+
   } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({ success: false, message: 'Failed to create payment order' });
+    console.error('Create order error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create payment order',
+    });
   }
 };
 
-// @desc    Verify Razorpay payment signature
-// @route   POST /api/payment/verify
-// @access  Private
+// ===============================
+// VERIFY PAYMENT
+// ===============================
 const verifyPayment = async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-    return res.status(400).json({ success: false, message: 'All payment fields are required' });
+    return res.status(400).json({
+      success: false,
+      message: 'All payment fields are required',
+    });
   }
 
   try {
-    // Verify signature
+    // 🔐 Signature verification
     const body = razorpay_order_id + '|' + razorpay_payment_id;
+
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(body)
@@ -93,10 +111,26 @@ const verifyPayment = async (req, res) => {
         { razorpayOrderId: razorpay_order_id },
         { status: 'failed' }
       );
-      return res.status(400).json({ success: false, message: 'Payment verification failed — signature mismatch' });
+
+      return res.status(400).json({
+        success: false,
+        message: 'Payment verification failed (signature mismatch)',
+      });
     }
 
-    // Update payment record
+    // Prevent double verification
+    const existing = await Payment.findOne({
+      razorpayPaymentId: razorpay_payment_id,
+    });
+
+    if (existing) {
+      return res.json({
+        success: true,
+        message: 'Payment already verified',
+      });
+    }
+
+    // Update payment
     const payment = await Payment.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
       {
@@ -109,56 +143,89 @@ const verifyPayment = async (req, res) => {
     );
 
     if (!payment) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
     }
 
-    // Upgrade user plan — set expiry 30 days from now
+    // ⏳ Plan expiry (30 days)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    await User.findByIdAndUpdate(req.user._id, {
+    await User.findByIdAndUpdate(payment.userId, {
       plan: payment.plan,
       planExpiresAt: expiresAt,
     });
 
     res.json({
       success: true,
-      message: 'Payment verified successfully! Your plan has been upgraded.',
+      message: 'Payment successful 🎉 Plan upgraded!',
       paymentId: razorpay_payment_id,
-      orderId: razorpay_order_id,
       plan: payment.plan,
       expiresAt,
     });
+
   } catch (error) {
-    console.error('Verify payment error:', error);
-    res.status(500).json({ success: false, message: 'Server error during payment verification' });
+    console.error('Verify payment error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error during payment verification',
+    });
   }
 };
 
-// @desc    Get payment history for logged-in user
-// @route   GET /api/payment/history
-// @access  Private
+// ===============================
+// USER PAYMENT HISTORY
+// ===============================
 const getHistory = async (req, res) => {
   try {
-    const payments = await Payment.find({ userId: req.user._id }).sort({ createdAt: -1 });
-    res.json({ success: true, count: payments.length, data: payments });
+    const payments = await Payment.find({ userId: req.user._id })
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: payments.length,
+      data: payments,
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+    });
   }
 };
 
-// @desc    Get ALL payments (admin only)
-// @route   GET /api/payment/all
-// @access  Admin only
+// ===============================
+// ADMIN - ALL PAYMENTS
+// ===============================
 const getAllPayments = async (req, res) => {
   try {
     const payments = await Payment.find({})
       .sort({ createdAt: -1 })
       .populate('userId', 'name email');
-    res.json({ success: true, count: payments.length, data: payments });
+
+    res.json({
+      success: true,
+      count: payments.length,
+      data: payments,
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+    });
   }
 };
 
-module.exports = { createOrder, verifyPayment, getHistory, getAllPayments };
+module.exports = {
+  createOrder,
+  verifyPayment,
+  getHistory,
+  getAllPayments,
+};
