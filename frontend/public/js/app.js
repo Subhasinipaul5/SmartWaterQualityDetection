@@ -1337,10 +1337,10 @@ async function downloadReport(type) {
 // ════════════════════════════════════════════════════════════
 async function loadPayment() {
   if (!getToken()) return;
+
   const user = getUser();
   const isAdmin = user && user.role === 'admin';
 
-  // Toggle plan grid / admin banner / page title for admin vs regular user
   const planGrid    = document.getElementById('plan-grid-section');
   const adminBanner = document.getElementById('admin-premium-banner');
   const pageTitle   = document.getElementById('payment-page-title');
@@ -1362,24 +1362,39 @@ async function loadPayment() {
     if (pageSub && user) pageSub.innerHTML     = `Current plan: <span id="current-plan-badge" style="font-weight:600;color:var(--primary)">${user.plan.toUpperCase()}</span>`;
     if (secureNote)  secureNote.style.display  = 'flex';
     if (histTitle)   histTitle.textContent     = 'Payment History';
-    const badge = document.getElementById('current-plan-badge');
-    if (badge && user) badge.textContent = user.plan.toUpperCase();
   }
 
-  const { ok, data } = await PaymentAPI.getHistory();
+  // ✅ FIX HERE
+  let res;
+  if (isAdmin) {
+    res = await PaymentAPI.getAll();
+  } else {
+    res = await PaymentAPI.getHistory();
+  }
+
+  const { ok, data } = res;
+
   const tbody = document.getElementById('payment-history-body');
   if (!tbody) return;
+
   if (!ok || !data.success || !data.data.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No payment records yet</td></tr>`;
     return;
   }
-  tbody.innerHTML = data.data.map(p => `<tr>
-    <td>${new Date(p.createdAt).toLocaleDateString()}</td>
-    <td>${p.plan.charAt(0).toUpperCase() + p.plan.slice(1)} Plan</td>
-    <td>₹${(p.amount / 100).toFixed(0)}</td>
-    <td style="font-family:var(--mono);font-size:11px">${p.razorpayPaymentId || p.razorpayOrderId}</td>
-    <td><span class="tag ${p.status === 'paid' ? 'tag-safe' : p.status === 'failed' ? 'tag-danger' : 'tag-warn'}">${p.status}</span></td>
-  </tr>`).join('');
+
+  tbody.innerHTML = data.data.map(p => `
+    <tr>
+      <td>${new Date(p.createdAt).toLocaleDateString()}</td>
+      <td>${p.plan.charAt(0).toUpperCase() + p.plan.slice(1)} Plan</td>
+      <td>₹${(p.amount / 100).toFixed(0)}</td>
+      <td style="font-family:var(--mono);font-size:11px">${p.razorpayPaymentId || p.razorpayOrderId}</td>
+      <td>
+        <span class="tag ${p.status === 'paid' ? 'tag-safe' : p.status === 'failed' ? 'tag-danger' : 'tag-warn'}">
+          ${p.status}
+        </span>
+      </td>
+    </tr>
+  `).join('');
 }
 
 async function initiatePayment(plan) {
