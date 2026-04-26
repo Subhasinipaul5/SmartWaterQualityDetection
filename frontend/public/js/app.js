@@ -430,8 +430,12 @@ async function loadStations() {
 
   // Show/hide Add Reading button based on role
   const user = getUser();
-  const addBtn = document.getElementById('stations-add-btn');
-  if (addBtn) addBtn.style.display = (user && user.role === 'admin') ? 'inline-flex' : 'none';
+const addBtn = document.getElementById('stations-add-btn');
+
+if (addBtn) {
+  addBtn.style.display = (user?.role === 'admin') ? 'inline-flex' : 'none';
+}
+
 
   const { ok, data } = await WaterAPI.getLatest();
   const grid = document.getElementById('station-cards');
@@ -450,6 +454,16 @@ async function loadStations() {
   loadReadingsHistory();
 
   if (ok && data.success && data.data.length) loadStationDetail(data.data[0]);
+}
+function openModal(id) {
+  const user = getUser();
+
+  if (id === 'modal-add-reading' && user?.role !== 'admin') {
+    toast('Only admin can add readings', 'error');
+    return;
+  }
+
+  document.getElementById(id)?.classList.add('open');
 }
 
 function stationCardHTML(s, i, user) {
