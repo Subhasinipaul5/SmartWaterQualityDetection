@@ -1,6 +1,6 @@
 // ─── API Configuration ──────────────────────────────────────────
-// const BASE_URL = "https://smartwaterqualitydetection-1.onrender.com";
-const API_BASE = "https://smartwaterqualitydetection-1.onrender.com";
+// const API_BASE ="https://smartwaterqualitydetection-1.onrender.com";
+const API_BASE = "https://smartwaterqualitydetection-1.onrender.com/api+ /api/water";
 // ─── Token helpers ──────────────────────────────────────────────
 const getToken = () => localStorage.getItem('aq_token');
 const setToken = (t) => localStorage.setItem('aq_token', t);
@@ -34,27 +34,27 @@ async function apiFetch(endpoint, options = {}) {
 
 // ─── Auth API ────────────────────────────────────────────────────
 const AuthAPI = {
-  register:    (body) => apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(body) }),
-  login:       (body) => apiFetch('/api/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
-  me:          ()     => apiFetch('/api/auth/me'),
-  updateProfile: (body) => apiFetch('/api/auth/profile',         { method: 'PUT', body: JSON.stringify(body) }),
-  changePassword:(body) => apiFetch('/api/auth/change-password', { method: 'PUT', body: JSON.stringify(body) }),
-  getAllUsers:  ()     => apiFetch('/api/auth/users'),
-  promoteUser: (id)   => apiFetch(`/api/auth/promote/${id}`,    { method: 'PUT' }),
+  register:    (body) => apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
+  login:       (body) => apiFetch('/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
+  me:          ()     => apiFetch('/auth/me'),
+  updateProfile: (body) => apiFetch('/auth/profile',         { method: 'PUT', body: JSON.stringify(body) }),
+  changePassword:(body) => apiFetch('/auth/change-password', { method: 'PUT', body: JSON.stringify(body) }),
+  getAllUsers:  ()     => apiFetch('/auth/users'),
+  promoteUser: (id)   => apiFetch(`/auth/promote/${id}`,    { method: 'PUT' }),
 };
 
 // ─── Water API ───────────────────────────────────────────────────
 const WaterAPI = {
-  addReading:      (body)    => apiFetch('/water',            { method: 'POST', body: JSON.stringify(body) }),
-  getAll:          (params)  => apiFetch(`/water?${new URLSearchParams(params)}`),
-  getLatest:       ()        => apiFetch('/water/latest'),
-  getStation:      (id, p)   => apiFetch(`/water/station/${id}?${new URLSearchParams(p || {})}`),
-  getAnalytics:    (params)  => apiFetch(`/water/analytics?${new URLSearchParams(params)}`),
-  getAlerts:       (params)  => apiFetch(`/water/alerts?${new URLSearchParams(params || {})}`),
-  resolveAlert:    (id)      => apiFetch(`/water/alerts/${id}/resolve`, { method: 'PUT' }),
-  deleteReading:   (id)      => apiFetch(`/water/${id}`,                { method: 'DELETE' }),
-  restoreReading:  (id)      => apiFetch(`/water/${id}/restore`,        { method: 'PUT' }),
-  updateReading:   (id,body) => apiFetch(`/water/${id}`,                { method: 'PUT', body: JSON.stringify(body) }),
+  addReading:      (body)    => apiFetch('/api/water',            { method: 'POST', body: JSON.stringify(body) }),
+  getAll:          (params)  => apiFetch(`/api/water?${new URLSearchParams(params)}`),
+  getLatest:       ()        => apiFetch('/api/water/latest'),
+  getStation:      (id, p)   => apiFetch(`/api/water/station/${id}?${new URLSearchParams(p || {})}`),
+  getAnalytics:    (params)  => apiFetch(`/api/water/analytics?${new URLSearchParams(params)}`),
+  getAlerts:       (params)  => apiFetch(`/api/water/alerts?${new URLSearchParams(params || {})}`),
+  resolveAlert:    (id)      => apiFetch(`/api/water/alerts/${id}/resolve`, { method: 'PUT' }),
+  deleteReading:   (id)      => apiFetch(`/api/water/${id}`,                { method: 'DELETE' }),
+  restoreReading:  (id)      => apiFetch(`/api/water/${id}/restore`,        { method: 'PUT' }),
+  updateReading:   (id,body) => apiFetch(`/api/water/${id}`,                { method: 'PUT', body: JSON.stringify(body) }),
 };
 
 // ─── Contact API ─────────────────────────────────────────────────
