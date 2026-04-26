@@ -510,7 +510,7 @@ function loadStationDetail(station) {
   if (!table) return;
   const r = station.readings;
   const rows = [
-    ['pH', r.ph, '—', '6.5 – 8.5', r.ph >= 6.5 && r.ph <= 8.5],
+    ['ph', r.ph, '—', '6.5 – 8.5', r.ph >= 6.5 && r.ph <= 8.5],
     ['Turbidity', r.turbidity, 'NTU', '0 – 100', r.turbidity <= 100],
     ['Temperature', r.temperature, '°C', '10 – 35', r.temperature >= 10 && r.temperature <= 35],
     ['Dissolved O₂', r.dissolvedOxygen, 'mg/L', '6.0 – 12.0', r.dissolvedOxygen >= 6],
@@ -734,7 +734,7 @@ document.getElementById('add-reading-form')?.addEventListener('submit', async (e
         <span style="font-size:16px">✅</span>
         <div style="flex:1">
           <div style="font-size:13px;font-weight:500">${savedName} reading saved</div>
-          <div style="font-size:11px;opacity:.8">WQI: ${data.wqi} · Status: ${data.status.toUpperCase()}</div>
+          <div style="font-size:11px;opacity:.8">WQI: ${data.data.wqi} · Status: ${data.data.status.toUpperCase()}</div>
         </div>
         <button onclick="this.closest('.toast').remove()" style="background:none;border:none;color:inherit;font-size:18px;cursor:pointer;opacity:.7">×</button>
       </div>
