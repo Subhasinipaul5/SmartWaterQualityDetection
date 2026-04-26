@@ -1,6 +1,6 @@
 // ─── API Configuration ──────────────────────────────────────────
 // const API_BASE ="https://smartwaterqualitydetection-1.onrender.com";
-const API_BASE = "https://smartwaterqualitydetection-1.onrender.com/api+ /api/water";
+const API_BASE = "https://smartwaterqualitydetection-1.onrender.com/api";
 // ─── Token helpers ──────────────────────────────────────────────
 const getToken = () => localStorage.getItem('aq_token');
 const setToken = (t) => localStorage.setItem('aq_token', t);
@@ -45,16 +45,16 @@ const AuthAPI = {
 
 // ─── Water API ───────────────────────────────────────────────────
 const WaterAPI = {
-  addReading:      (body)    => apiFetch('/api/water',            { method: 'POST', body: JSON.stringify(body) }),
-  getAll:          (params)  => apiFetch(`/api/water?${new URLSearchParams(params)}`),
-  getLatest:       ()        => apiFetch('/api/water/latest'),
-  getStation:      (id, p)   => apiFetch(`/api/water/station/${id}?${new URLSearchParams(p || {})}`),
-  getAnalytics:    (params)  => apiFetch(`/api/water/analytics?${new URLSearchParams(params)}`),
-  getAlerts:       (params)  => apiFetch(`/api/water/alerts?${new URLSearchParams(params || {})}`),
-  resolveAlert:    (id)      => apiFetch(`/api/water/alerts/${id}/resolve`, { method: 'PUT' }),
-  deleteReading:   (id)      => apiFetch(`/api/water/${id}`,                { method: 'DELETE' }),
-  restoreReading:  (id)      => apiFetch(`/api/water/${id}/restore`,        { method: 'PUT' }),
-  updateReading:   (id,body) => apiFetch(`/api/water/${id}`,                { method: 'PUT', body: JSON.stringify(body) }),
+  addReading:      (body) => apiFetch('/water', { method: 'POST', body: JSON.stringify(body) }),
+  getAll:          (params) => apiFetch(`/water?${new URLSearchParams(params)}`),
+  getLatest:       () => apiFetch('/water/latest'),
+  getStation:      (id,p) => apiFetch(`/water/station/${id}?${new URLSearchParams(p || {})}`),
+  getAnalytics:    (params) => apiFetch(`/water/analytics?${new URLSearchParams(params)}`),
+  getAlerts:       (params) => apiFetch(`/water/alerts?${new URLSearchParams(params || {})}`),
+  resolveAlert:    (id) => apiFetch(`/water/alerts/${id}/resolve`, { method: 'PUT' }),
+  deleteReading:   (id) => apiFetch(`/water/${id}`, { method: 'DELETE' }),
+  restoreReading:  (id) => apiFetch(`/water/${id}/restore`, { method: 'PUT' }),
+  updateReading:   (id,body) => apiFetch(`/water/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
 };
 
 // ─── Contact API ─────────────────────────────────────────────────
